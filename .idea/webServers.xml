@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="WebServers">
+    <option name="servers">
+      <webServer id="fa46b681-9d62-451d-ab06-b50f168eff1f" name="mcqueen">
+        <fileTransfer rootFolder="/home/joseph" accessType="SFTP" host="mcqueen" port="22" sshConfigId="d0db5cf0-212d-4c80-b88d-47938287d7af" sshConfig="joseph@mcqueen:22 agent" authAgent="true">
+          <advancedOptions>
+            <advancedOptions dataProtectionLevel="Private" passiveMode="true" shareSSLContext="true" />
+          </advancedOptions>
+        </fileTransfer>
+      </webServer>
+      <webServer id="066c60a9-215a-401d-8bb4-42387f5360c9" name="mcqueen - root path">
+        <fileTransfer accessType="SFTP" host="mcqueen" port="22" sshConfigId="d0db5cf0-212d-4c80-b88d-47938287d7af" sshConfig="joseph@mcqueen:22 agent" authAgent="true">
+          <advancedOptions>
+            <advancedOptions dataProtectionLevel="Private" passiveMode="true" shareSSLContext="true" />
+          </advancedOptions>
+        </fileTransfer>
+      </webServer>
+    </option>
+  </component>
+</project>

@@ -1,0 +1,13 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="Start 'McQueen' Cluster" type="docker-deploy" factoryName="docker-compose.yml" server-name="Docker (McQueen)">
+    <deployment type="docker-compose.yml">
+      <settings>
+        <option name="envFilePath" value="$PROJECT_DIR$/.env" />
+        <option name="commandLineOptions" value="--build" />
+        <option name="sourceFilePath" value="docker/docker-compose.yml" />
+        <option name="upDetach" value="false" />
+      </settings>
+    </deployment>
+    <method v="2" />
+  </configuration>
+</component>

@@ -1,0 +1,112 @@
+version: '3'
+services:
+    # tor is an image for running a tor relay server and hosting hidden services.
+    # The hidden services will be the btcd and lnd nodes in our cluster.
+    tor:
+      image: tor
+      container_name: tor
+      build:
+        context: tor/
+      volumes:
+        #- type: volume
+        #  source: tor
+        #  target: /root/.tor
+        # Use a bind mount to mitigate the risk of removing the tor volume and
+        # losing node/hidden service keys.
+        - type: bind
+          source: ${HOST_TOR_DIR}
+          target: /root/.tor
+      network_mode: host
+      entrypoint: ["./start-tor.sh"]
+
+    # btc is an image of bitcoin node which used as base image for btcd and
+    # btccli. The environment variables default values determined on stage of
+    # container start within starting script.
+    btcd:
+      image: btcd
+      container_name: btcd
+      build:
+        context: btcd/
+      volumes:
+        - type: bind
+          source: ${HOST_RPC_DIR}
+          target: /rpc
+        #- type: volume
+        #  source: btcd
+        #  target: /data
+        # Use a bind mount to save blockchain data to a different hard drive
+        # from where the host operatiing system is running.
+        - type: bind
+          source: ${HOST_BTCD_DIR}
+          target: /root/.btcd
+      network_mode: host
+      environment:
+        - RPC_USER
+        - RPC_PASS
+        - NETWORK
+        - DEBUG
+        - MINING_ADDRESS
+      entrypoint: ["./start-btcd.sh"]
+      depends_on:
+        - tor
+
+    # btcwallet is an image for creating wallet seeds and keys. The btcwallet
+    # opens an RPC interface for supporting wallet-related methods in bitcoin's
+    # JSON-RPC API.
+    btcwallet:
+      image: btcwallet
+      container_name: btcwallet
+      build:
+        context: btcwallet/
+      volumes:
+        - type: bind
+          source: ${HOST_RPC_DIR}
+          target: /rpc
+        - type: bind
+          source: ${HOST_BTCWALLET_DIR}
+          target: /root/.btcwallet
+      network_mode: host
+      environment:
+        - RPC_USER
+        - RPC_PASS
+        - NETWORK
+        - DEBUG
+        - WALLET_PASS
+      entrypoint: ["./start-btcwallet.sh"]
+      depends_on:
+        - btcd
+
+    # lnd is an image for running a lnd node. The lnd node will need to connect
+    # to btcd as it's backend for retrieving blockchain data. It will also connect
+    # to the tor container for handling request to the lnd hidden service.
+    lnd:
+      image: lnd
+      container_name: lnd
+      build:
+        context: lnd/
+      volumes:
+        - type: bind
+          source: ${HOST_RPC_DIR}
+          target: /rpc
+        - type: volume
+          source: lnd
+          target: /root/.lnd
+      network_mode: host
+      environment:
+        - RPC_USER
+        - RPC_PASS
+        - LND_RPC_PORT
+        - LND_P2P_PORT
+        - NETWORK
+        - CHAIN
+        - DEBUG
+      entrypoint: ["./start-lnd.sh"]
+      depends_on:
+        - tor
+        - btcd
+
+volumes:
+  # lnd volume is used for persisting lnd application data and chain state
+  # during container lifecycle.
+  lnd:
+    driver: local
